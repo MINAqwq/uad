@@ -13,8 +13,8 @@ Requests use a predefined object.
 
 ```json
 {
-        op: (INT)
-        args: {
+        Op: (INT)
+        Args: {
                 // ...
         }
 }
@@ -29,8 +29,8 @@ Responses are also predefined at the first level.
 
 ```json
 {
-        err: "" // empty string means no error
-        resp: {
+        Err: "" // empty string means no error
+        Resp: {
 
         }
 }
@@ -43,13 +43,15 @@ Everything in `resp` (Response) depends on `OP`.
 
 `OP` is represented in hexadecimal.
 
+All arguments are strings
+
 | OP   | Name  | Arguments | 
 | ---- | ----- | --------- |
 | 0000 | VER   | None      |
-| 0001 | LOGIN | email: `str`, password: `str` |
-| 0002 | NEW   | email: `str`, username: `str`, password: `str` |
-| 0003 | INFO  | token: `str` |
-| 0004 | SAVE  | token: `str`, ... |
-| 0005 | DEL0  | token: `str` |
-| 0006 | DEL1  | token: `str`, code: `str` |
+| 0001 | LOGIN | email, password |
+| 0002 | NEW   | email, username, password |
+| 0003 | INFO  | token |
+| 0004 | SAVE  | token, ... |
+| 0005 | DEL0  | token |
+| 0006 | DEL1  | token , code |
 
