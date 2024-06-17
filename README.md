@@ -1,6 +1,6 @@
 # UAD - User Authentification Daemon
 
-Provides an API returning data in CBOR.
+Provides an API reading and returning data in JSON.
 
 
 ## API
