@@ -1,7 +1,5 @@
 package main
 
-import "log"
-
 type AuthmRequest struct {
 	Op   int
 	Args []string
@@ -22,13 +20,23 @@ const (
 	OP_DEL1  = iota
 )
 
+func authm_op_ver(req *AuthmRequest, resp *AuthmResponse) {
+	if len(req.Args) > 0 {
+		resp.Err = "invalid arguments"
+		return
+	}
+
+	resp.Resp["ver"] = 1
+}
+
 func authm_exec(req *AuthmRequest) AuthmResponse {
 
 	resp := AuthmResponse{}
+	resp.Resp = make(map[string]any)
 
-	log.Printf("READ OP: %d", req.Op)
 	switch req.Op {
 	case OP_VER:
+		authm_op_ver(req, &resp)
 		break
 	case OP_LOGIN:
 		break
