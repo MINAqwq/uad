@@ -43,7 +43,7 @@ func authm_exec(req *AuthmRequest) AuthmResponse {
 	case OP_DEL1:
 		break
 	default:
-		resp.Error = "invalid operations"
+		resp.Err = "invalid operations"
 	}
 
 	return resp
