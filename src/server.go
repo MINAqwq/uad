@@ -9,10 +9,11 @@ import (
 	"net"
 )
 
-func _server_handleClient(conn net.Conn) {
+func _server_handle_client(conn net.Conn) {
 	defer conn.Close()
+
 	buf := make([]byte, 512)
-	_, err := conn.Read(buf)
+	n, err := conn.Read(buf)
 	if err != nil {
 		log.Printf("[SERVER] %s | Error: %s", conn.RemoteAddr(), err)
 		return
@@ -20,12 +21,23 @@ func _server_handleClient(conn net.Conn) {
 
 	log.Printf("[SERVER] %s | REQUEST\n%s\n", conn.RemoteAddr(), string(buf))
 
-	resp, err := json.Marshal(`{"server": "ua","version": 0.1}`)
+	req := AuthmRequest{}
+	err = json.Unmarshal(buf[:n], &req)
 	if err != nil {
-		log.Printf("[SERVER] json ahh")
+		log.Printf("[SERVER] %s, Error: request is not json (%s)", conn.RemoteAddr(), err)
 		return
 	}
-	_, err = conn.Write(resp)
+
+	resp := authm_exec(&req)
+
+	resp_data, err := json.Marshal(resp)
+	if err != nil {
+		log.Printf("[SERVER] %s, Error: marshal response (%s)", conn.RemoteAddr(), err)
+		return
+	}
+
+	_, err = conn.Write(resp_data)
+
 	if err != nil {
 		log.Printf("[SERVER] %s | Error: %s", conn.RemoteAddr(), err)
 		return
@@ -68,6 +80,6 @@ func server_run() {
 			}
 		}
 
-		go _server_handleClient(conn)
+		go _server_handle_client(conn)
 	}
 }
