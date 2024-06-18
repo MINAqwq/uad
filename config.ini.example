@@ -1,8 +1,12 @@
+[Server]
 INTERFACE=""
 PORT=""
 
 TLS_CERT=""
 TLS_KEY=""
 
-DB_ADDR=""
-DB_PORT=""
+[Database]
+USERNAME=""
+PASSWORD=""
+ADDRESS=""
+PORT=""

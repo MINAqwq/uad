@@ -11,6 +11,8 @@ type GlobalConfig struct {
 	port        string
 	tls_cert    string
 	tls_key     string
+	db_user     string
+	db_pass     string
 	db_addr     string
 	db_port     string
 }
@@ -24,7 +26,9 @@ const KEY_CONFIG_SERVER_TLS_CERT string = "TLS_CERT"
 const KEY_CONFIG_SERVER_TLS_KEY string = "TLS_KEY"
 
 const KEY_CONFIG_DATABASE string = "Database"
-const KEY_CONFIG_DATABASE_ADDR string = "ADDR"
+const KEY_CONFIG_DATABASE_USER string = "USERNAME"
+const KEY_CONFIG_DATABASE_PASS string = "PASSWORD"
+const KEY_CONFIG_DATABASE_ADDR string = "ADDRESS"
 const KEY_CONFIG_DATABASE_PORT string = "PORT"
 
 func config_load(path string) {
@@ -46,6 +50,7 @@ func config_load(path string) {
 
 	if (!cfg_server.HasKey(KEY_CONFIG_SERVER_INTERFACE)) || (!cfg_server.HasKey(KEY_CONFIG_SERVER_PORT)) ||
 		(!cfg_server.HasKey(KEY_CONFIG_SERVER_TLS_CERT)) || (!cfg_server.HasKey(KEY_CONFIG_SERVER_TLS_KEY)) ||
+		(!cfg_db.HasKey(KEY_CONFIG_DATABASE_USER)) || (!cfg_db.HasKey(KEY_CONFIG_DATABASE_PASS)) ||
 		(!cfg_db.HasKey(KEY_CONFIG_DATABASE_ADDR)) || (!cfg_db.HasKey(KEY_CONFIG_DATABASE_PORT)) {
 		log.Fatalf("[CONFIG] Config invalid %s", path)
 	}
@@ -55,8 +60,10 @@ func config_load(path string) {
 	conf.tls_cert = cfg_server.Key(KEY_CONFIG_SERVER_TLS_CERT).MustString("")
 	conf.tls_key = cfg_server.Key(KEY_CONFIG_SERVER_TLS_KEY).MustString("")
 
+	conf.db_user = cfg_db.Key(KEY_CONFIG_DATABASE_USER).MustString("")
+	conf.db_pass = cfg_db.Key(KEY_CONFIG_DATABASE_PASS).MustString("")
 	conf.db_addr = cfg_db.Key(KEY_CONFIG_DATABASE_ADDR).MustString("")
-	conf.db_addr = cfg_db.Key(KEY_CONFIG_DATABASE_PORT).MustString("")
+	conf.db_port = cfg_db.Key(KEY_CONFIG_DATABASE_PORT).MustString("")
 
 	global_cfg = conf
 }
