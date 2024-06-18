@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/rand"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"log"
 	"net"
@@ -25,6 +24,7 @@ func _server_handle_client(conn net.Conn) {
 	err = json.Unmarshal(buf[:n], &req)
 	if err != nil {
 		log.Printf("[SERVER] %s, Error: request is not json (%s)", conn.RemoteAddr(), err)
+		conn.Write([]byte("bad request\n"))
 		return
 	}
 
@@ -33,6 +33,7 @@ func _server_handle_client(conn net.Conn) {
 	resp_data, err := json.Marshal(resp)
 	if err != nil {
 		log.Printf("[SERVER] %s, Error: marshal response (%s)", conn.RemoteAddr(), err)
+		conn.Write([]byte("internal error\n"))
 		return
 	}
 
@@ -72,14 +73,6 @@ func server_run() {
 		defer conn.Close()
 
 		log.Printf("[SERVER] connection from %s", conn.RemoteAddr())
-		tlscon, ok := conn.(*tls.Conn)
-		if ok {
-			state := tlscon.ConnectionState()
-			for _, v := range state.PeerCertificates {
-				log.Print(x509.MarshalPKIXPublicKey(v.PublicKey))
-			}
-		}
-
 		go _server_handle_client(conn)
 	}
 }
