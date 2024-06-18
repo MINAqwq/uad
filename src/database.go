@@ -9,18 +9,20 @@ import (
 
 var global_db *sql.DB
 
-func db_usr_create(username string, email string, passwd string) {
+func db_usr_create(username string, email string, passwd string) bool {
 	stmt, err := global_db.Prepare("INSERT INTO usr (username, email, passwd) VALUES (?, ?, ?);")
 	if err != nil {
 		log.Print("[  DB  ] Failed to prepare statement: db_usr_create")
-		return
+		return false
 	}
 
 	_, err = stmt.Exec(username, email, passwd)
 	if err != nil {
 		log.Print("[  DB  ] Failed to exec statement: db_usr_create")
-		return
+		return false
 	}
+
+	return true
 }
 
 func db_open() {
