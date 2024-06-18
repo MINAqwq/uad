@@ -10,3 +10,7 @@ USERNAME=""
 PASSWORD=""
 ADDRESS=""
 PORT=""
+
+[Security]
+SALT_SIZE=0
+SALT_POS=0

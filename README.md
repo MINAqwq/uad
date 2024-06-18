@@ -14,9 +14,11 @@ Requests use a predefined object.
 ```json
 {
         Op: (INT)
-        Args: {
+        Args: [
+                "arg1",
+                "arg2",
                 // ...
-        }
+        ]
 }
 ```
 
@@ -49,11 +51,12 @@ All arguments are strings
 | ---- | ----- | --------- |
 | 0000 | VER   | None      |
 | 0001 | LOGIN | email, password |
-| 0002 | NEW   | email, username, password |
-| 0003 | INFO  | token |
-| 0004 | SAVE  | token, ... |
-| 0005 | DEL0  | token |
-| 0006 | DEL1  | token , code |
+| 0002 | NEW0  | email, username, password |
+| 0003 | NEW1  | code |
+| 0004 | INFO  | token | 
+| 0005 | SAVE  | token, ... |
+| 0006 | DEL0  | token |
+| 0007 | DEL1  | token , code |
 
 ## Database
 
@@ -66,12 +69,13 @@ The UAD speaks with a mysql/mariadb server and reads and writes from a database 
 
 | Name | Type |
 | ---- | ---- |
-| id   | `BIGINT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL` |
+| id | `BIGINT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL` |
 | username | `VARCHAR(20) UNIQUE NOT NULL` |
 | email | `VARCHAR(40) UNIQUE NOT NULL` |
-| passwd | `CHAR(256) UNIQUE NOT NULL` |
+| passwd | `MEDIUMTEXT UNIQUE NOT NULL` |
 | info | `MEDIUMTEXT NOT NULL DEFAULT ""` | 
 | created | `TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP` |
+| verified | `BOOLEAN NOT NULL DEFAULT FALSE` |
 
 ```sql
 CREATE TABLE IF NOT EXISTS usr (
@@ -80,7 +84,8 @@ CREATE TABLE IF NOT EXISTS usr (
         email VARCHAR(40) UNIQUE NOT NULL,
         passwd MEDIUMTEXT NOT NULL,
         info MEDIUMTEXT NOT NULL DEFAULT "",
-        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        verified BOOLEAN NOT NULL DEFAULT FALSE
 );
 ```
 

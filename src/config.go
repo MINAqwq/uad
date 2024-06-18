@@ -15,6 +15,8 @@ type GlobalConfig struct {
 	db_pass     string
 	db_addr     string
 	db_port     string
+	salt_size   int
+	salt_pos    int
 }
 
 var global_cfg GlobalConfig
@@ -31,6 +33,10 @@ const KEY_CONFIG_DATABASE_PASS string = "PASSWORD"
 const KEY_CONFIG_DATABASE_ADDR string = "ADDRESS"
 const KEY_CONFIG_DATABASE_PORT string = "PORT"
 
+const KEY_CONFIG_SECURITY string = "Security"
+const KEY_CONFIG_SECURITY_SALT_SIZE string = "SALT_SIZE"
+const KEY_CONFIG_SECURITY_SALT_POS string = "SALT_POS"
+
 func config_load(path string) {
 	var conf GlobalConfig
 
@@ -41,17 +47,19 @@ func config_load(path string) {
 		log.Fatalf("[CONFIG] Error: Can't load %s", path)
 	}
 
-	if (!cfg.HasSection(KEY_CONFIG_SERVER)) || (!cfg.HasSection(KEY_CONFIG_DATABASE)) {
+	if (!cfg.HasSection(KEY_CONFIG_SERVER)) || (!cfg.HasSection(KEY_CONFIG_DATABASE) || (!cfg.HasSection(KEY_CONFIG_SECURITY))) {
 		log.Fatalf("[CONFIG] Error: invalid (%s)", path)
 	}
 
 	cfg_server := cfg.Section(KEY_CONFIG_SERVER)
 	cfg_db := cfg.Section(KEY_CONFIG_DATABASE)
+	cfg_sec := cfg.Section(KEY_CONFIG_SECURITY)
 
 	if (!cfg_server.HasKey(KEY_CONFIG_SERVER_INTERFACE)) || (!cfg_server.HasKey(KEY_CONFIG_SERVER_PORT)) ||
 		(!cfg_server.HasKey(KEY_CONFIG_SERVER_TLS_CERT)) || (!cfg_server.HasKey(KEY_CONFIG_SERVER_TLS_KEY)) ||
 		(!cfg_db.HasKey(KEY_CONFIG_DATABASE_USER)) || (!cfg_db.HasKey(KEY_CONFIG_DATABASE_PASS)) ||
-		(!cfg_db.HasKey(KEY_CONFIG_DATABASE_ADDR)) || (!cfg_db.HasKey(KEY_CONFIG_DATABASE_PORT)) {
+		(!cfg_db.HasKey(KEY_CONFIG_DATABASE_ADDR)) || (!cfg_db.HasKey(KEY_CONFIG_DATABASE_PORT)) ||
+		(!cfg_sec.HasKey(KEY_CONFIG_SECURITY_SALT_SIZE)) || (!cfg_sec.HasKey(KEY_CONFIG_SECURITY_SALT_POS)) {
 		log.Fatalf("[CONFIG] Config invalid %s", path)
 	}
 
@@ -64,6 +72,9 @@ func config_load(path string) {
 	conf.db_pass = cfg_db.Key(KEY_CONFIG_DATABASE_PASS).MustString("")
 	conf.db_addr = cfg_db.Key(KEY_CONFIG_DATABASE_ADDR).MustString("")
 	conf.db_port = cfg_db.Key(KEY_CONFIG_DATABASE_PORT).MustString("")
+
+	conf.salt_size = cfg_sec.Key(KEY_CONFIG_SECURITY_SALT_SIZE).MustInt(0)
+	conf.salt_pos = cfg_sec.Key(KEY_CONFIG_SECURITY_SALT_POS).MustInt(0)
 
 	global_cfg = conf
 }
