@@ -55,3 +55,35 @@ All arguments are strings
 | 0005 | DEL0  | token |
 | 0006 | DEL1  | token , code |
 
+## Database
+
+The UAD speaks with a mysql/mariadb server and reads and writes from a database named `mso`.
+
+
+### Table
+
+#### usr
+
+| Name | Type |
+| ---- | ---- |
+| id   | `BIGINT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL` |
+| username | `VARCHAR(20) UNIQUE NOT NULL` |
+| email | `VARCHAR(40) UNIQUE NOT NULL` |
+| passwd | `CHAR(256) UNIQUE NOT NULL` |
+| info | `MEDIUMTEXT NOT NULL DEFAULT ""` | 
+| created | `TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP` |
+
+```sql
+CREATE TABLE IF NOT EXISTS usr (
+        id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL,
+        username VARCHAR(20) UNIQUE NOT NULL,
+        email VARCHAR(40) UNIQUE NOT NULL,
+        passwd MEDIUMTEXT NOT NULL,
+        info MEDIUMTEXT NOT NULL DEFAULT "",
+        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+```sql
+INSERT INTO usr (username, email, passwd) VALUES ("root", "root@minaqwq.dev", "Root123@");
+```
