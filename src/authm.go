@@ -1,6 +1,9 @@
 package main
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 type AuthmRequest struct {
 	Op   int
@@ -17,6 +20,7 @@ const (
 	OP_LOGIN = iota
 	OP_NEW0  = iota
 	OP_NEW1  = iota
+	OP_VRFY  = iota
 	OP_INFO  = iota
 	OP_SAVE  = iota
 	OP_DEL0  = iota
@@ -57,7 +61,13 @@ func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-	resp.Resp["token"] = "TOKEN"
+	token := session_create(user.id, user.email, int64(time.Hour*2))
+	if token == "" {
+		resp.Err = "internal error :c"
+		return
+	}
+
+	resp.Resp["token"] = token
 	return
 }
 
@@ -98,7 +108,7 @@ func authm_op_new0(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-	log.Printf("NEW0: %s <%s>", req.Args[0], req.Args[1])
+	log.Printf("[ AUTH ] New Account: %s <%s>", req.Args[0], req.Args[1])
 	resp.Resp["msg"] = "Account was created!"
 }
 
@@ -114,6 +124,15 @@ func authm_op_new1(req *AuthmRequest, resp *AuthmResponse) {
 	}
 
 	resp.Resp["msg"] = "Verified ^w^"
+}
+
+func authm_op_verify(req *AuthmRequest, resp *AuthmResponse) {
+	if len(req.Args) != 1 {
+		resp.Err = "bad arguments"
+		return
+	}
+
+	resp.Resp["valid"] = session_validate(req.Args[0])
 }
 
 func authm_op_info(req *AuthmRequest, resp *AuthmResponse) {
@@ -133,6 +152,8 @@ func authm_exec(req *AuthmRequest) AuthmResponse {
 	resp := AuthmResponse{}
 	resp.Resp = make(map[string]any)
 
+	log.Printf("[ AUTH ] OP %d", req.Op)
+
 	switch req.Op {
 	case OP_VER:
 		authm_op_ver(req, &resp)
@@ -145,6 +166,9 @@ func authm_exec(req *AuthmRequest) AuthmResponse {
 		break
 	case OP_NEW1:
 		authm_op_new1(req, &resp)
+		break
+	case OP_VRFY:
+		authm_op_verify(req, &resp)
 		break
 	case OP_INFO:
 		break

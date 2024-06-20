@@ -53,10 +53,11 @@ All arguments are strings
 | 0001 | LOGN  | email, password |
 | 0002 | NEW0  | email, username, password |
 | 0003 | NEW1  | code |
-| 0004 | INFO  | token | 
-| 0005 | SAVE  | token, ... |
-| 0006 | DEL0  | token |
-| 0007 | DEL1  | token , code |
+| 0004 | VRFY  | token |
+| 0005 | INFO  | token | 
+| 0006 | SAVE  | token, ... |
+| 0007 | DEL0  | token |
+| 0008 | DEL1  | token , code |
 
 ## Database
 

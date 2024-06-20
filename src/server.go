@@ -11,14 +11,14 @@ import (
 func _server_handle_client(conn net.Conn) {
 	defer conn.Close()
 
-	buf := make([]byte, 512)
+	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 	if err != nil {
 		log.Printf("[SERVER] %s | Error: %s", conn.RemoteAddr(), err)
 		return
 	}
 
-	log.Printf("[SERVER] %s | REQUEST\n%s\n", conn.RemoteAddr(), string(buf))
+	// log.Printf("[SERVER] %s | REQUEST\n%s\n", conn.RemoteAddr(), string(buf))
 
 	req := AuthmRequest{}
 	err = json.Unmarshal(buf[:n], &req)
