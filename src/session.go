@@ -21,7 +21,8 @@ func session_create(id uint64, email string, valid_for int64) string {
 
 	session_json, err := json.Marshal(session_data)
 	if err != nil {
-		log.Printf("[USESSN] Failed to encode json for map containing [id: %d, email: %s, expires: %d]", id, email, session_data.Expires)
+		log.Printf("[USESSN] Failed to encode json for map containing [id: %d, email: %s, expires: %d]",
+			id, email, session_data.Expires)
 		return ""
 	}
 
@@ -32,7 +33,7 @@ func session_create(id uint64, email string, valid_for int64) string {
 	return crypted
 }
 
-func session_validate(token string) bool {
+func session_read(token string, buffer *UserSessionData) bool {
 	token_bytes, err := hex.DecodeString(token)
 	if err != nil {
 		log.Println("[USESSN] " + err.Error())
@@ -44,14 +45,20 @@ func session_validate(token string) bool {
 		return false
 	}
 
-	session_data := UserSessionData{}
-	err = json.Unmarshal(clear_bytes, &session_data)
+	err = json.Unmarshal(clear_bytes, &buffer)
 	if err != nil {
 		log.Println("[USESSN] " + err.Error())
 		return false
 	}
 
-	log.Printf("[USESSN] Session decoded: {%d, %s, %d}", session_data.Id, session_data.Email, session_data.Expires)
+	log.Printf("[USESSN] Session decoded: {%d, %s, %d}", buffer.Id, buffer.Email, buffer.Expires)
 
-	return session_data.Expires > time.Now().Unix()
+	return true
+}
+
+func session_validate(token string) bool {
+
+	session_data := UserSessionData{}
+	return session_read(token, &session_data) &&
+		(session_data.Expires > time.Now().Unix())
 }

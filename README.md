@@ -2,6 +2,9 @@
 
 Provides an API reading and returning data in JSON.
 
+## TODO
+
+- [ ] use unix timestamps instead of date string
 
 ## API
 

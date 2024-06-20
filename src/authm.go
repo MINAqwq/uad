@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 )
@@ -13,6 +14,12 @@ type AuthmRequest struct {
 type AuthmResponse struct {
 	Err  string
 	Resp map[string]any
+}
+
+type AuthmUserInfo struct {
+	Username string
+	Info     string
+	Created  string
 }
 
 const (
@@ -136,6 +143,31 @@ func authm_op_verify(req *AuthmRequest, resp *AuthmResponse) {
 }
 
 func authm_op_info(req *AuthmRequest, resp *AuthmResponse) {
+	if len(req.Args) != 1 {
+		resp.Err = "bad arguments"
+		return
+	}
+
+	user := UadDbUser{}
+	session_data := UserSessionData{}
+
+	if (!session_read(req.Args[0], &session_data)) || (!db_usr_get_user_id(session_data.Id, &user)) {
+		resp.Err = "invalid token"
+		return
+	}
+
+	info := AuthmUserInfo{}
+	info.Username = user.username
+	info.Info = user.info
+	info.Created = user.created
+
+	json_data, err := json.Marshal(info)
+	if err != nil {
+		resp.Err = "internal error"
+		return
+	}
+
+	resp.Resp["User"] = json_data
 }
 
 func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
@@ -171,6 +203,7 @@ func authm_exec(req *AuthmRequest) AuthmResponse {
 		authm_op_verify(req, &resp)
 		break
 	case OP_INFO:
+		authm_op_info(req, &resp)
 		break
 	case OP_SAVE:
 		break

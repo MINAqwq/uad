@@ -23,14 +23,33 @@ const (
 	DB_QUERY_CREATE        string = `INSERT INTO usr (username, email, passwd) VALUES (?, ?, ?);`
 	DB_QUERY_CREATE_CODE   string = `INSERT INTO usr_verify (id, code) VALUES ((SELECT id FROM usr WHERE username = ?), ?);`
 	DB_QUERY_USER_BY_MAIL  string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE email = ?;`
+	DB_QUERY_USER_BY_ID    string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE id = ?;`
 )
 
 var global_db *sql.DB
 
+func db_usr_get_user_id(id uint64, user *UadDbUser) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_USER_BY_ID)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_USER_BY_ID)
+		return false
+	}
+
+	row := stmt.QueryRow(id)
+
+	err = row.Scan(&user.id, &user.username, &user.email, &user.passwd_hashed, &user.info, &user.created, &user.verified)
+	if err != nil {
+		log.Printf("[  DB  ] Row scan failed after: %s (%s)", DB_QUERY_USER_BY_ID, err)
+		return false
+	}
+
+	return true
+}
+
 func db_usr_get_user(email string, user *UadDbUser) bool {
 	stmt, err := global_db.Prepare(DB_QUERY_USER_BY_MAIL)
 	if err != nil {
-		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_VERIFY)
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_USER_BY_MAIL)
 		return false
 	}
 
