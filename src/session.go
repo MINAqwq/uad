@@ -51,7 +51,7 @@ func session_validate(token string) bool {
 		return false
 	}
 
-	log.Printf("[USESSN Session decoded: {%d, %s, %d}]", session_data.Id, session_data.Email, session_data.Expires)
+	log.Printf("[USESSN] Session decoded: {%d, %s, %d}", session_data.Id, session_data.Email, session_data.Expires)
 
 	return session_data.Expires > time.Now().Unix()
 }
