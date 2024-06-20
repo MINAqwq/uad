@@ -13,6 +13,11 @@ type AuthmRequest struct {
 	Args []string
 }
 
+type AuthmResponse struct {
+	Err  string
+	Resp map[string]any
+}
+
 func test_ver() {
 
 }
@@ -47,7 +52,21 @@ func main() {
 	}
 	conn.Write(data)
 
-	reply := make([]byte, 256)
-	_, err = conn.Read(reply)
-	log.Print("ANSW: " + string(reply))
+	reply := make([]byte, 1024)
+	n, err := conn.Read(reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp := AuthmResponse{}
+	err = json.Unmarshal(reply[:n], &resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(resp.Err) != 0 {
+		log.Fatal("ERROR: " + resp.Err)
+	}
+
+	log.Println(resp.Resp)
 }
