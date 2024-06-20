@@ -7,24 +7,117 @@ import (
 	"log"
 )
 
+type UadDbUser struct {
+	id            uint64
+	username      string
+	email         string
+	passwd_hashed string
+	info          string
+	created       string
+	verified      bool
+}
+
+const (
+	DB_QUERY_VERIFY        string = `UPDATE usr SET verified = 1 WHERE id = (SELECT id FROM usr_verify WHERE code = ?);`
+	DB_QUERY_DELETE_VERIFY string = `DELETE FROM usr_verify WHERE code = ?;`
+	DB_QUERY_CREATE        string = `INSERT INTO usr (username, email, passwd) VALUES (?, ?, ?);`
+	DB_QUERY_CREATE_CODE   string = `INSERT INTO usr_verify (id, code) VALUES ((SELECT id FROM usr WHERE username = ?), ?);`
+	DB_QUERY_USER_BY_MAIL  string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE email = ?;`
+)
+
 var global_db *sql.DB
 
-func db_usr_create(username string, email string, passwd string) bool {
-	stmt, err := global_db.Prepare("INSERT INTO usr (username, email, passwd) VALUES (?, ?, ?);")
+func db_usr_get_user(email string, user *UadDbUser) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_USER_BY_MAIL)
 	if err != nil {
-		log.Print("[  DB  ] Failed to prepare statement: db_usr_create")
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_VERIFY)
 		return false
 	}
 
-	_, err = stmt.Exec(username, email, passwd)
+	row := stmt.QueryRow(email)
+
+	err = row.Scan(&user.id, &user.username, &user.email, &user.passwd_hashed, &user.info, &user.created, &user.verified)
 	if err != nil {
-		log.Print("[  DB  ] Failed to exec statement: db_usr_create")
+		log.Printf("[  DB  ] Row scan failed after: %s (%s)", DB_QUERY_USER_BY_MAIL, err)
 		return false
 	}
 
 	return true
 }
 
+// verify a user with the given code
+func db_usr_verify(code string) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_VERIFY)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_VERIFY)
+		return false
+	}
+
+	res, err := stmt.Exec(code)
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_VERIFY)
+		return false
+	}
+
+	rows_affected, err := res.RowsAffected()
+
+	if err != nil || rows_affected != 1 {
+		return false
+	}
+
+	stmt, err = global_db.Prepare(DB_QUERY_DELETE_VERIFY)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_DELETE_VERIFY)
+		return false
+	}
+
+	_, err = stmt.Exec(code)
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_DELETE_VERIFY)
+		return false
+	}
+
+	return true
+}
+
+func db_usr_create_code(username string) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_CREATE_CODE)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_CREATE_CODE)
+		return false
+	}
+
+	for {
+		_, err = stmt.Exec(username, security_create_verify_code())
+		if err == nil {
+			break
+		}
+		log.Print("[  DB  ] db_usr_create_code exec failed :c (retry...)")
+	}
+
+	log.Printf("[  DB  ] Verify code for user %s got created!", username)
+
+	return true
+}
+
+// create unverified user account
+func db_usr_create(username string, email string, passwd string) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_CREATE)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_CREATE)
+		return false
+	}
+
+	_, err = stmt.Exec(username, email, passwd)
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_CREATE)
+		return false
+	}
+
+	return true
+}
+
+// connect to database and setup global_db instance
 func db_open() {
 	connection_string := global_cfg.db_user + `:` + global_cfg.db_pass + "@tcp(" + global_cfg.db_addr + ":" + global_cfg.db_port + ")/mso"
 	db, err := sql.Open("mysql", connection_string)

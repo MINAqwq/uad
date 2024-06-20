@@ -9,11 +9,23 @@ import (
 
 var salt_symbols = []rune("0123456789abcdef")
 
+var verify_code_symbols = []rune("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+
+func security_create_verify_code() string {
+	b := make([]rune, 12)
+	for i := range b {
+		b[i] = verify_code_symbols[rand.Intn(len(verify_code_symbols))]
+	}
+
+	return string(b)
+}
+
 func security_create_salt() string {
 	b := make([]rune, global_cfg.salt_size)
 	for i := range b {
 		b[i] = salt_symbols[rand.Intn(len(salt_symbols))]
 	}
+
 	return string(b)
 }
 
@@ -30,4 +42,8 @@ func security_hash_salt_password(passwd_clear string, salt_str string) string {
 	log.Printf("[SECRTY] New Hash: %s", hash_str)
 
 	return hash_str
+}
+
+func security_hash_extract_salt(pwhash string) string {
+	return pwhash[global_cfg.salt_pos:][:global_cfg.salt_size]
 }

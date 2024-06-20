@@ -49,8 +49,8 @@ All arguments are strings
 
 | OP   | Name  | Arguments | 
 | ---- | ----- | --------- |
-| 0000 | VER   | None      |
-| 0001 | LOGIN | email, password |
+| 0000 | VERS  | None      |
+| 0001 | LOGN  | email, password |
 | 0002 | NEW0  | email, username, password |
 | 0003 | NEW1  | code |
 | 0004 | INFO  | token | 
@@ -90,6 +90,18 @@ CREATE TABLE IF NOT EXISTS usr (
 );
 ```
 
+
+#### usr_verify
+
+| Name | Type |
+| ---- | ---- |
+| id | `BIGINT UNSIGNED` |
+| code | `TINYTEXT UNIQUE` |
+
 ```sql
-INSERT INTO usr (username, email, passwd) VALUES ("root", "root@minaqwq.dev", "Root123@");
+CREATE TABLE IF NOT EXISTS usr_verify (
+        id BIGINT UNSIGNED NOT NULL,
+        code TINYTEXT UNIQUE NOT NULL,
+        PRIMARY KEY (id)
+);
 ```

@@ -33,6 +33,32 @@ func authm_op_ver(req *AuthmRequest, resp *AuthmResponse) {
 }
 
 func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
+	if len(req.Args) != 2 {
+		resp.Err = "bad arguments"
+		return
+	}
+
+	// TODO: check for bad character
+
+	if len(req.Args[0]) < 6 || len(req.Args[0]) > 40 || len(req.Args[1]) < 5 || len(req.Args[1]) > 20 {
+		resp.Err = "email or password wrong"
+		return
+	}
+
+	user := UadDbUser{}
+	if !db_usr_get_user(req.Args[0], &user) {
+		resp.Err = "email or password wrong"
+		return
+	}
+
+	passwd_hashed_1 := security_hash_salt_password(req.Args[1], security_hash_extract_salt(user.passwd_hashed))
+	if passwd_hashed_1 != user.passwd_hashed {
+		resp.Err = "email or password wrong"
+		return
+	}
+
+	resp.Resp["token"] = "TOKEN"
+	return
 }
 
 func authm_op_new0(req *AuthmRequest, resp *AuthmResponse) {
@@ -40,6 +66,8 @@ func authm_op_new0(req *AuthmRequest, resp *AuthmResponse) {
 		resp.Err = "bad arguments"
 		return
 	}
+
+	// TODO: check for bad character
 
 	// username size check
 	if len(req.Args[0]) < 3 || len(req.Args[0]) > 20 {
@@ -53,16 +81,39 @@ func authm_op_new0(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
+	// password size check
+	if len(req.Args[2]) < 5 || len(req.Args[2]) > 20 {
+		resp.Err = "password needs to be between 5 and 20 characters"
+		return
+	}
+
 	if !db_usr_create(req.Args[0], req.Args[1], security_hash_salt_password(req.Args[2], security_create_salt())) {
 		resp.Err = "unable to create account (username or email could be taken already)"
 		return
 	}
 
-	log.Printf("NEW0: %s <%s> [%s]", req.Args[0], req.Args[1], req.Args[2])
+	if !db_usr_create_code(req.Args[0]) {
+		log.Printf("[ AUTH ] Unable to create verify code for %s <%s>", req.Args[0], req.Args[1])
+		resp.Err = "Account created, but we where unable to create a verify code (please contact an admin)"
+		return
+	}
+
+	log.Printf("NEW0: %s <%s>", req.Args[0], req.Args[1])
 	resp.Resp["msg"] = "Account was created!"
 }
 
 func authm_op_new1(req *AuthmRequest, resp *AuthmResponse) {
+	if len(req.Args) != 1 {
+		resp.Err = "bad arguments"
+		return
+	}
+
+	if !db_usr_verify(req.Args[0]) {
+		resp.Err = "invalid code"
+		return
+	}
+
+	resp.Resp["msg"] = "Verified ^w^"
 }
 
 func authm_op_info(req *AuthmRequest, resp *AuthmResponse) {
@@ -93,6 +144,7 @@ func authm_exec(req *AuthmRequest) AuthmResponse {
 		authm_op_new0(req, &resp)
 		break
 	case OP_NEW1:
+		authm_op_new1(req, &resp)
 		break
 	case OP_INFO:
 		break
