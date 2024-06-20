@@ -122,15 +122,15 @@ func db_open() {
 	connection_string := global_cfg.db_user + `:` + global_cfg.db_pass + "@tcp(" + global_cfg.db_addr + ":" + global_cfg.db_port + ")/mso"
 	db, err := sql.Open("mysql", connection_string)
 	if err != nil {
-		log.Fatalf("failed to open database (%s) [%s]", err, connection_string)
+		log.Fatalf("Failed to open database (%s) [%s]", err, connection_string)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("failed to ping database (%s) [%s]", err, connection_string)
+		log.Fatalf("Failed to ping database (%s) [%s]", err, connection_string)
 	}
 
-	log.Println("[  DB  ] connected to mso database")
+	log.Println("[  DB  ] Connected to MSO-Database")
 
 	global_db = db
 }
