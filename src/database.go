@@ -24,6 +24,8 @@ const (
 	DB_QUERY_CREATE_CODE   string = `INSERT INTO usr_verify (id, code) VALUES ((SELECT id FROM usr WHERE username = ?), ?);`
 	DB_QUERY_USER_BY_MAIL  string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE email = ?;`
 	DB_QUERY_USER_BY_ID    string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE id = ?;`
+	DB_QUERY_UPDATE_INFO   string = `UPDATE usr SET info = ? WHERE id = ?;`
+	DB_QUERY_UPDATE_PASSWD string = `UPDATE usr SET passwd = ? WHERE id = ?;`
 )
 
 var global_db *sql.DB
@@ -130,6 +132,38 @@ func db_usr_create(username string, email string, passwd string) bool {
 	_, err = stmt.Exec(username, email, passwd)
 	if err != nil {
 		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_CREATE)
+		return false
+	}
+
+	return true
+}
+
+func db_usr_update_info(content string, id uint64) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_UPDATE_INFO)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_UPDATE_INFO)
+		return false
+	}
+
+	_, err = stmt.Exec(content, id)
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_UPDATE_INFO)
+		return false
+	}
+
+	return true
+}
+
+func db_usr_update_passwd(passwd_hashed string, id uint64) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_UPDATE_PASSWD)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_UPDATE_PASSWD)
+		return false
+	}
+
+	_, err = stmt.Exec(passwd_hashed, id)
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_UPDATE_PASSWD)
 		return false
 	}
 

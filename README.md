@@ -5,6 +5,8 @@ Provides an API reading and returning data in JSON.
 ## TODO
 
 - [ ] use unix timestamps instead of date string
+- [ ] make sessions obtained before a password change invalid
+- [ ] lookup username and email before doing insert
 
 ## API
 
@@ -58,7 +60,7 @@ All arguments are strings
 | 0003 | NEW1  | code |
 | 0004 | VRFY  | token |
 | 0005 | INFO  | token | 
-| 0006 | SAVE  | token, ... |
+| 0006 | SAVE  | token, field, value |
 | 0007 | DEL0  | token |
 | 0008 | DEL1  | token , code |
 

@@ -171,6 +171,36 @@ func authm_op_info(req *AuthmRequest, resp *AuthmResponse) {
 }
 
 func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
+	if len(req.Args) != 3 || len(req.Args[2]) == 0 {
+		resp.Err = "bad arguments"
+		return
+	}
+
+	session_data := UserSessionData{}
+	
+	// validate token 
+	if (!session_read(req.Args[0], &session_data)) {
+		resp.Err = "invalid token"
+		return
+	}
+
+	if req.Args[1] == "info" {
+		if db_usr_update_info(req.Args[2], session_data.Id) {
+			resp.Resp["msg"] = "done!"
+			return	
+		}
+	} else if req.Args[1] == "passwd" {
+		if db_usr_update_passwd(security_hash_salt_password(req.Args[2], security_create_salt()), session_data.Id) {
+			resp.Resp["msg"] = "done!"
+			return
+		}
+	} else {
+		resp.Err = "invalid field"
+		return
+	}
+
+	resp.Err = "internal error"
+	return
 }
 
 func authm_op_del0(req *AuthmRequest, resp *AuthmResponse) {
@@ -206,6 +236,7 @@ func authm_exec(req *AuthmRequest) AuthmResponse {
 		authm_op_info(req, &resp)
 		break
 	case OP_SAVE:
+		authm_op_save(req, &resp)
 		break
 	case OP_DEL0:
 		break
