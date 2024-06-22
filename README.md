@@ -6,10 +6,9 @@ Provides an API reading and returning data in JSON.
 
 - [ ] use unix timestamps instead of date string
 - [ ] make sessions obtained before a password change invalid
-- [ ] lookup username and email before doing insert
+
 
 ## API
-
 
 
 ### Request Structure

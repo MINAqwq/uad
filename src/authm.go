@@ -104,7 +104,8 @@ func authm_op_new0(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-	if !db_usr_create(req.Args[0], req.Args[1], security_hash_salt_password(req.Args[2], security_create_salt())) {
+	if db_usr_exists(req.Args[0], req.Args[1]) ||
+			!db_usr_create(req.Args[0], req.Args[1], security_hash_salt_password(req.Args[2], security_create_salt())) {
 		resp.Err = "unable to create account (username or email could be taken already)"
 		return
 	}

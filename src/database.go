@@ -20,6 +20,7 @@ type UadDbUser struct {
 const (
 	DB_QUERY_VERIFY        string = `UPDATE usr SET verified = 1 WHERE id = (SELECT id FROM usr_verify WHERE code = ?);`
 	DB_QUERY_DELETE_VERIFY string = `DELETE FROM usr_verify WHERE code = ?;`
+	DB_QUERY_USER_EXISTS   string = `SELECT COUNT(id) FROM usr WHERE username = ? OR email = ?;`
 	DB_QUERY_CREATE        string = `INSERT INTO usr (username, email, passwd) VALUES (?, ?, ?);`
 	DB_QUERY_CREATE_CODE   string = `INSERT INTO usr_verify (id, code) VALUES ((SELECT id FROM usr WHERE username = ?), ?);`
 	DB_QUERY_USER_BY_MAIL  string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE email = ?;`
@@ -64,6 +65,26 @@ func db_usr_get_user(email string, user *UadDbUser) bool {
 	}
 
 	return true
+}
+
+func db_usr_exists(username string, email string) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_USER_EXISTS)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_USER_EXISTS)
+		return false
+	}
+
+	row := stmt.QueryRow(username, email);
+
+	count := 0
+	err = row.Scan(&count)
+	if err != nil {
+		log.Printf("[  DB  ] Row scan failed after: %s (%s)", DB_QUERY_USER_BY_MAIL, err)
+		return false
+	}
+
+	return (count != 0)
+
 }
 
 // verify a user with the given code
