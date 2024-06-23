@@ -49,7 +49,7 @@ func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-// TODO: check for bad character
+	// TODO: check for bad character
 
 	if len(req.Args[0]) < 6 || len(req.Args[0]) > 40 || len(req.Args[1]) < 5 || len(req.Args[1]) > 20 {
 		resp.Err = "email or password wrong"
@@ -59,6 +59,11 @@ func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
 	user := UadDbUser{}
 	if !db_usr_get_user(req.Args[0], &user) {
 		resp.Err = "email or password wrong"
+		return
+	}
+
+	if !user.verified {
+		resp.Err = "please verify your account"
 		return
 	}
 
