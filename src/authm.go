@@ -49,7 +49,7 @@ func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-	// TODO: check for bad character
+// TODO: check for bad character
 
 	if len(req.Args[0]) < 6 || len(req.Args[0]) > 40 || len(req.Args[1]) < 5 || len(req.Args[1]) > 20 {
 		resp.Err = "email or password wrong"
@@ -68,7 +68,7 @@ func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-	token := session_create(user.id, user.email, int64(time.Hour*2))
+	token := session_create(user.id, user.email, user.passwd_hashed, int64(time.Hour*2))
 	if token == "" {
 		resp.Err = "internal error :c"
 		return

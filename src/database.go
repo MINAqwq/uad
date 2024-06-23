@@ -18,15 +18,16 @@ type UadDbUser struct {
 }
 
 const (
-	DB_QUERY_VERIFY        string = `UPDATE usr SET verified = 1 WHERE id = (SELECT id FROM usr_verify WHERE code = ?);`
-	DB_QUERY_DELETE_VERIFY string = `DELETE FROM usr_verify WHERE code = ?;`
-	DB_QUERY_USER_EXISTS   string = `SELECT COUNT(id) FROM usr WHERE username = ? OR email = ?;`
-	DB_QUERY_CREATE        string = `INSERT INTO usr (username, email, passwd) VALUES (?, ?, ?);`
-	DB_QUERY_CREATE_CODE   string = `INSERT INTO usr_verify (id, code) VALUES ((SELECT id FROM usr WHERE username = ?), ?);`
-	DB_QUERY_USER_BY_MAIL  string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE email = ?;`
-	DB_QUERY_USER_BY_ID    string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE id = ?;`
-	DB_QUERY_UPDATE_INFO   string = `UPDATE usr SET info = ? WHERE id = ?;`
-	DB_QUERY_UPDATE_PASSWD string = `UPDATE usr SET passwd = ? WHERE id = ?;`
+	DB_QUERY_VERIFY             string = `UPDATE usr SET verified = 1 WHERE id = (SELECT id FROM usr_verify WHERE code = ?);`
+	DB_QUERY_DELETE_VERIFY      string = `DELETE FROM usr_verify WHERE code = ?;`
+	DB_QUERY_USER_EXISTS        string = `SELECT COUNT(id) FROM usr WHERE username = ? OR email = ?;`
+	DB_QUERY_CREATE             string = `INSERT INTO usr (username, email, passwd) VALUES (?, ?, ?);`
+	DB_QUERY_CREATE_CODE        string = `INSERT INTO usr_verify (id, code) VALUES ((SELECT id FROM usr WHERE username = ?), ?) ON DUPLICATE KEY UPDATE code = ?;`
+	DB_QUERY_USER_BY_MAIL       string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE email = ?;`
+	DB_QUERY_USER_BY_ID         string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE id = ?;`
+	DB_QUERY_UPDATE_INFO        string = `UPDATE usr SET info = ? WHERE id = ?;`
+	DB_QUERY_UPDATE_PASSWD      string = `UPDATE usr SET passwd = ? WHERE id = ?;`
+	DB_QUERY_CREATE_DELETE_CODE string = `INSERT INTO usr_delete (id, code) VALUES (?,?);`
 )
 
 var global_db *sql.DB
@@ -129,8 +130,10 @@ func db_usr_create_code(username string) bool {
 		return false
 	}
 
+	code := security_create_verify_code();
+
 	for {
-		_, err = stmt.Exec(username, security_create_verify_code())
+		_, err = stmt.Exec(username, code, code);
 		if err == nil {
 			break
 		}
@@ -189,6 +192,10 @@ func db_usr_update_passwd(passwd_hashed string, id uint64) bool {
 	}
 
 	return true
+}
+
+func db_usr_create_delete_code() { 
+	
 }
 
 // connect to database and setup global_db instance
