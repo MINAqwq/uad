@@ -60,8 +60,9 @@ All arguments are strings
 | 0004 | VRFY  | token |
 | 0005 | INFO  | token | 
 | 0006 | SAVE  | token, field, value |
-| 0007 | DEL0  | token |
-| 0008 | DEL1  | token , code |
+| 0007 | DEL  | token |
+
+
 
 ## Database
 

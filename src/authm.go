@@ -30,8 +30,7 @@ const (
 	OP_VRFY  = iota
 	OP_INFO  = iota
 	OP_SAVE  = iota
-	OP_DEL0  = iota
-	OP_DEL1  = iota
+	OP_DEL   = iota
 )
 
 func authm_op_ver(req *AuthmRequest, resp *AuthmResponse) {
@@ -209,10 +208,7 @@ func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
 	return
 }
 
-func authm_op_del0(req *AuthmRequest, resp *AuthmResponse) {
-}
-
-func authm_op_del1(req *AuthmRequest, resp *AuthmResponse) {
+func authm_op_del(req *AuthmRequest, resp *AuthmResponse) {
 }
 
 func authm_exec(req *AuthmRequest) AuthmResponse {
@@ -244,9 +240,8 @@ func authm_exec(req *AuthmRequest) AuthmResponse {
 	case OP_SAVE:
 		authm_op_save(req, &resp)
 		break
-	case OP_DEL0:
-		break
-	case OP_DEL1:
+	case OP_DEL:
+		authm_op_del(req, &resp)
 		break
 	default:
 		resp.Err = "invalid operations"
