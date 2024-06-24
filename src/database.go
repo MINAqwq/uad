@@ -28,6 +28,29 @@ const (
 	DB_QUERY_UPDATE_INFO        string = `UPDATE usr SET info = ? WHERE id = ?;`
 	DB_QUERY_UPDATE_PASSWD      string = `UPDATE usr SET passwd = ? WHERE id = ?;`
 	DB_QUERY_CREATE_DELETE_CODE string = `INSERT INTO usr_delete (id, code) VALUES (?,?);`
+
+	DB_QUERY_TABLE_CREATE_USR   string = `CREATE TABLE IF NOT EXISTS usr (
+		id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL,
+		username VARCHAR(20) UNIQUE NOT NULL,
+		email VARCHAR(40) UNIQUE NOT NULL,
+		passwd MEDIUMTEXT NOT NULL,
+		info MEDIUMTEXT NOT NULL DEFAULT "",
+		created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		verified BOOLEAN NOT NULL DEFAULT FALSE,
+		PRIMARY KEY (id)
+	);`
+
+	DB_QUERY_TABLE_CREATE_USR_V string = `CREATE TABLE IF NOT EXISTS usr_verify (
+		id BIGINT UNSIGNED UNIQUE NOT NULL,
+		code TINYTEXT UNIQUE NOT NULL,
+		PRIMARY KEY (id)
+	);`
+	
+	DB_QUERY_TABLE_CREATE_USR_D string = `CREATE TABLE IF NOT EXISTS usr_delete (
+		id BIGINT UNSIGNED UNIQUE NOT NULL,
+		code TINYTEXT UNIQUE NOT NULL,
+		PRIMARY KEY (id)
+	);`
 )
 
 var global_db *sql.DB
@@ -198,6 +221,24 @@ func db_usr_create_delete_code() {
 	
 }
 
+// create the needed table if they don't exist
+func db_create_table() {
+	_, err := global_db.Exec(DB_QUERY_TABLE_CREATE_USR);
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
+	}
+	
+	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_V);
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
+	}
+
+	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_D);
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
+	}
+}
+
 // connect to database and setup global_db instance
 func db_open() {
 	connection_string := global_cfg.db_user + `:` + global_cfg.db_pass + "@tcp(" + global_cfg.db_addr + ":" + global_cfg.db_port + ")/mso"
@@ -214,4 +255,6 @@ func db_open() {
 	log.Println("[  DB  ] Connected to MSO-Database")
 
 	global_db = db
+
+	db_create_table()
 }
