@@ -45,6 +45,17 @@ Responses are also predefined at the first level.
 Everything in `resp` (Response) depends on `OP`.
 
 
+## Privileges
+
+On a login a privileges can be specified as bit mask.
+
+| Name | Description | Bit (LSB) |
+| ---- | ----------- | --------- |
+| VERFY | Token can only be used to be verified as valid | 1 |
+| RINFO | Token can be used to read user information (name, info and account creation date) | 2 |
+| EXTAC | Extended access token can be used for OP SAVE and DEL. So NEVER send such a token to an untrusted server. | 3 |
+
+
 ## Operations
 
 `OP` is represented in hexadecimal.
@@ -54,7 +65,7 @@ All arguments are strings
 | OP   | Name  | Arguments | 
 | ---- | ----- | --------- |
 | 0000 | VERS  | None      |
-| 0001 | LOGN  | email, password |
+| 0001 | LOGN  | email, password, priv_mask |
 | 0002 | NEW0  | email, username, password |
 | 0003 | NEW1  | code |
 | 0004 | VRFY  | token |

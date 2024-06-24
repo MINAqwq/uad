@@ -12,14 +12,22 @@ type UserSessionData struct {
 	Email   string
 	Passhsh string
 	Expires int64
+	Privs   uint32
 }
 
-func session_create(id uint64, email string, password_hash string, valid_for int64) string {
+const (
+	SESSION_PRIV_VERFY = (1 << iota) // token can be verified (this bit needs to be set)
+	SESSION_PRIV_RINFO = (1 << iota) // read username, info and creation date
+	SESSION_PRIV_EXTAC = (1 << iota) // extended access: delete account, change info, password and email
+)
+
+func session_create(id uint64, email string, password_hash string, valid_for int64, priv_mask uint32) string {
 	session_data := UserSessionData{}
 	session_data.Id = id
 	session_data.Email = email
 	session_data.Passhsh = session_passhsh_slice(password_hash)
 	session_data.Expires = (time.Now().Unix() + valid_for)
+	session_data.Privs = priv_mask
 
 	session_json, err := json.Marshal(session_data)
 	if err != nil {
@@ -63,14 +71,14 @@ func session_read(token string, buffer *UserSessionData) bool {
 	return true
 }
 
-func session_validate(token string) bool {
+func session_validate(session_data *UserSessionData) bool {
 
-	session_data := UserSessionData{}
 	db_user := UadDbUser{}
 
-	return session_read(token, &session_data) &&
+	return (session_data.Expires > time.Now().Unix()) &&
+		(session_data.Privs & SESSION_PRIV_VERFY) != 0 &&
 		db_usr_get_user_id(session_data.Id, &db_user) &&
-		(session_data.Expires > time.Now().Unix()) &&
 		(session_data.Email == db_user.email) &&
 		(session_data.Passhsh == session_passhsh_slice(db_user.passwd_hashed))
 }
+

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"time"
+	"strconv"
 )
 
 type AuthmRequest struct {
@@ -43,7 +44,7 @@ func authm_op_ver(req *AuthmRequest, resp *AuthmResponse) {
 }
 
 func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
-	if len(req.Args) != 2 {
+	if len(req.Args) != 3 {
 		resp.Err = "bad arguments"
 		return
 	}
@@ -72,7 +73,11 @@ func authm_op_login(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-	token := session_create(user.id, user.email, user.passwd_hashed, int64(time.Hour*2))
+	priv_mask, err := strconv.Atoi(req.Args[2])
+	if err != nil {
+	}
+
+	token := session_create(user.id, user.email, user.passwd_hashed, int64(time.Hour*2), uint32(priv_mask))
 	if token == "" {
 		resp.Err = "internal error :c"
 		return
@@ -144,7 +149,8 @@ func authm_op_verify(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
-	resp.Resp["valid"] = session_validate(req.Args[0])
+	session_data := UserSessionData{}
+	resp.Resp["valid"] = session_read(req.Args[0], &session_data) && session_validate(&session_data)
 }
 
 func authm_op_info(req *AuthmRequest, resp *AuthmResponse) {
@@ -156,10 +162,17 @@ func authm_op_info(req *AuthmRequest, resp *AuthmResponse) {
 	user := UadDbUser{}
 	session_data := UserSessionData{}
 
-	if (!session_read(req.Args[0], &session_data)) || (!db_usr_get_user_id(session_data.Id, &user)) {
+	if (!session_read(req.Args[0], &session_data)) || (!session_validate(&session_data)) {
 		resp.Err = "invalid token"
 		return
 	}
+
+	if (session_data.Privs & SESSION_PRIV_RINFO) == 0 {
+		resp.Err = "insufficient permissions"
+		return
+	}
+
+	db_usr_get_user_id(session_data.Id, &user)
 
 	info := AuthmUserInfo{}
 	info.Username = user.username
@@ -183,9 +196,13 @@ func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
 
 	session_data := UserSessionData{}
 	
-	// validate token 
-	if (!session_read(req.Args[0], &session_data)) {
+	if (!session_read(req.Args[0], &session_data)) || (!session_validate(&session_data)) {
 		resp.Err = "invalid token"
+		return
+	}
+
+	if (session_data.Privs & SESSION_PRIV_EXTAC) == 0 {
+		resp.Err = "insufficient permissions"
 		return
 	}
 
@@ -209,6 +226,25 @@ func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
 }
 
 func authm_op_del(req *AuthmRequest, resp *AuthmResponse) {
+	if len(req.Args) != 1 {
+		resp.Err = "bad arguments"
+		return
+	}
+
+	session_data := UserSessionData{}
+
+	if (!session_read(req.Args[0], &session_data)) || (!session_validate(&session_data)) {
+		resp.Err = "invalid token"
+		return
+	}
+
+	if (session_data.Privs & SESSION_PRIV_EXTAC) == 0 {
+		resp.Err = "insufficient permissions"		
+		return
+	}
+
+	resp.Resp["msg"] = "Account " + session_data.Email + " got deleted :c"
+
 }
 
 func authm_exec(req *AuthmRequest) AuthmResponse {
