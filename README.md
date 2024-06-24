@@ -4,8 +4,8 @@ Provides an API reading and returning data in JSON.
 
 ## TODO
 
-- [ ] use unix timestamps instead of date string
-- [ ] make sessions obtained before a password change invalid
+- [ ] Error codes instead of strings (transport less bytes)
+- [ ] Verification code mailing
 
 
 ## API
