@@ -66,7 +66,7 @@ func session_read(token string, buffer *UserSessionData) bool {
 	}
 
 	log.Printf("[USESSN] Session decoded: {%d, %s, %s, %d}",
-			buffer.Id, buffer.Email, buffer.Passhsh, buffer.Expires)
+		buffer.Id, buffer.Email, buffer.Passhsh, buffer.Expires)
 
 	return true
 }
@@ -76,9 +76,8 @@ func session_validate(session_data *UserSessionData) bool {
 	db_user := UadDbUser{}
 
 	return (session_data.Expires > time.Now().Unix()) &&
-		(session_data.Privs & SESSION_PRIV_VERFY) != 0 &&
+		(session_data.Privs&SESSION_PRIV_VERFY) != 0 &&
 		db_usr_get_user_id(session_data.Id, &db_user) &&
 		(session_data.Email == db_user.email) &&
 		(session_data.Passhsh == session_passhsh_slice(db_user.passwd_hashed))
 }
-

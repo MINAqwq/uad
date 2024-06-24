@@ -29,7 +29,7 @@ const (
 	DB_QUERY_UPDATE_PASSWD      string = `UPDATE usr SET passwd = ? WHERE id = ?;`
 	DB_QUERY_CREATE_DELETE_CODE string = `INSERT INTO usr_delete (id, code) VALUES (?,?);`
 
-	DB_QUERY_TABLE_CREATE_USR   string = `CREATE TABLE IF NOT EXISTS usr (
+	DB_QUERY_TABLE_CREATE_USR string = `CREATE TABLE IF NOT EXISTS usr (
 		id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL,
 		username VARCHAR(20) UNIQUE NOT NULL,
 		email VARCHAR(40) UNIQUE NOT NULL,
@@ -45,7 +45,7 @@ const (
 		code TINYTEXT UNIQUE NOT NULL,
 		PRIMARY KEY (id)
 	);`
-	
+
 	DB_QUERY_TABLE_CREATE_USR_D string = `CREATE TABLE IF NOT EXISTS usr_delete (
 		id BIGINT UNSIGNED UNIQUE NOT NULL,
 		code TINYTEXT UNIQUE NOT NULL,
@@ -98,7 +98,7 @@ func db_usr_exists(username string, email string) bool {
 		return false
 	}
 
-	row := stmt.QueryRow(username, email);
+	row := stmt.QueryRow(username, email)
 
 	count := 0
 	err = row.Scan(&count)
@@ -153,10 +153,10 @@ func db_usr_create_code(username string) bool {
 		return false
 	}
 
-	code := security_create_verify_code();
+	code := security_create_verify_code()
 
 	for {
-		_, err = stmt.Exec(username, code, code);
+		_, err = stmt.Exec(username, code, code)
 		if err == nil {
 			break
 		}
@@ -217,23 +217,23 @@ func db_usr_update_passwd(passwd_hashed string, id uint64) bool {
 	return true
 }
 
-func db_usr_create_delete_code() { 
-	
+func db_usr_create_delete_code() {
+
 }
 
 // create the needed table if they don't exist
 func db_create_table() {
-	_, err := global_db.Exec(DB_QUERY_TABLE_CREATE_USR);
-	if err != nil {
-		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
-	}
-	
-	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_V);
+	_, err := global_db.Exec(DB_QUERY_TABLE_CREATE_USR)
 	if err != nil {
 		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
 	}
 
-	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_D);
+	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_V)
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
+	}
+
+	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_D)
 	if err != nil {
 		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
 	}

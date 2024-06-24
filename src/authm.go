@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"time"
 	"strconv"
+	"time"
 )
 
 type AuthmRequest struct {
@@ -114,7 +114,7 @@ func authm_op_new0(req *AuthmRequest, resp *AuthmResponse) {
 	}
 
 	if db_usr_exists(req.Args[0], req.Args[1]) ||
-			!db_usr_create(req.Args[0], req.Args[1], security_hash_salt_password(req.Args[2], security_create_salt())) {
+		!db_usr_create(req.Args[0], req.Args[1], security_hash_salt_password(req.Args[2], security_create_salt())) {
 		resp.Err = "unable to create account (username or email could be taken already)"
 		return
 	}
@@ -195,7 +195,7 @@ func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
 	}
 
 	session_data := UserSessionData{}
-	
+
 	if (!session_read(req.Args[0], &session_data)) || (!session_validate(&session_data)) {
 		resp.Err = "invalid token"
 		return
@@ -209,7 +209,7 @@ func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
 	if req.Args[1] == "info" {
 		if db_usr_update_info(req.Args[2], session_data.Id) {
 			resp.Resp["msg"] = "done!"
-			return	
+			return
 		}
 	} else if req.Args[1] == "passwd" {
 		if db_usr_update_passwd(security_hash_salt_password(req.Args[2], security_create_salt()), session_data.Id) {
@@ -239,7 +239,7 @@ func authm_op_del(req *AuthmRequest, resp *AuthmResponse) {
 	}
 
 	if (session_data.Privs & SESSION_PRIV_EXTAC) == 0 {
-		resp.Err = "insufficient permissions"		
+		resp.Err = "insufficient permissions"
 		return
 	}
 
