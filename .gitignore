@@ -1,5 +1,5 @@
-src/uad
 test/test
 cert.pem
 key.pem
 config.ini
+build
