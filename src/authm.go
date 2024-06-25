@@ -243,6 +243,8 @@ func authm_op_del(req *AuthmRequest, resp *AuthmResponse) {
 		return
 	}
 
+	db_usr_delete(session_data.Id)
+
 	resp.Resp["msg"] = "Account " + session_data.Email + " got deleted :c"
 
 }

@@ -27,7 +27,8 @@ const (
 	DB_QUERY_USER_BY_ID         string = `SELECT id, username, email, passwd, info, created, verified FROM usr WHERE id = ?;`
 	DB_QUERY_UPDATE_INFO        string = `UPDATE usr SET info = ? WHERE id = ?;`
 	DB_QUERY_UPDATE_PASSWD      string = `UPDATE usr SET passwd = ? WHERE id = ?;`
-	DB_QUERY_CREATE_DELETE_CODE string = `INSERT INTO usr_delete (id, code) VALUES (?,?);`
+
+	DB_QUERY_DELETE_ACCOUNT string = `DELETE FROM usr WHERE id = ?;`
 
 	DB_QUERY_TABLE_CREATE_USR string = `CREATE TABLE IF NOT EXISTS usr (
 		id BIGINT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL,
@@ -41,12 +42,6 @@ const (
 	);`
 
 	DB_QUERY_TABLE_CREATE_USR_V string = `CREATE TABLE IF NOT EXISTS usr_verify (
-		id BIGINT UNSIGNED UNIQUE NOT NULL,
-		code TINYTEXT UNIQUE NOT NULL,
-		PRIMARY KEY (id)
-	);`
-
-	DB_QUERY_TABLE_CREATE_USR_D string = `CREATE TABLE IF NOT EXISTS usr_delete (
 		id BIGINT UNSIGNED UNIQUE NOT NULL,
 		code TINYTEXT UNIQUE NOT NULL,
 		PRIMARY KEY (id)
@@ -217,8 +212,21 @@ func db_usr_update_passwd(passwd_hashed string, id uint64) bool {
 	return true
 }
 
-func db_usr_create_delete_code() {
+func db_usr_delete(id uint64) bool {
+	stmt, err := global_db.Prepare(DB_QUERY_DELETE_ACCOUNT)
+	if err != nil {
+		log.Print("[  DB  ] Failed to prepare statement: " + DB_QUERY_DELETE_ACCOUNT)
+		return false
+	}
 
+	_, err = stmt.Exec(id)
+
+	if err != nil {
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_DELETE_ACCOUNT)
+		return false
+	}
+
+	return true
 }
 
 // create the needed table if they don't exist
@@ -230,12 +238,7 @@ func db_create_table() {
 
 	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_V)
 	if err != nil {
-		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
-	}
-
-	_, err = global_db.Exec(DB_QUERY_TABLE_CREATE_USR_D)
-	if err != nil {
-		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR)
+		log.Print("[  DB  ] Failed to exec statement: " + DB_QUERY_TABLE_CREATE_USR_V)
 	}
 }
 
