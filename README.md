@@ -66,13 +66,114 @@ All arguments are strings
 | ---- | ----- | --------- |
 | 0000 | VERS  | None      |
 | 0001 | LOGN  | email, password, priv_mask |
-| 0002 | NEW0  | email, username, password |
+| 0002 | NEW0  | username, email, password |
 | 0003 | NEW1  | code |
 | 0004 | VRFY  | token |
 | 0005 | INFO  | token | 
 | 0006 | SAVE  | token, field, value |
 | 0007 | DEL  | token |
 
+
+### VERS
+
+Get the servers major version.
+
+```json
+{
+    "ver": (INT)
+}
+```
+
+
+### LOGN
+
+Obtain a session token to authenticate.
+
+```json
+{
+    "token": (STR)
+}
+```
+
+
+### NEW0
+
+Register a new account.
+
+```json
+{
+    "msg": (STR)
+}
+```
+
+
+### NEW1
+
+Verify a account.
+
+```json
+{
+    "msg": (STR)
+}
+```
+
+
+### VRFY
+
+Validate a session token.
+
+```json
+{
+    "valid": (BOOL)
+}
+```
+
+Privileges needed: `VERFY`
+
+
+### INFO
+
+Obtain user information.
+
+```json
+{
+    "Username": (STR),
+    "Info": (STR),
+    "Created": (STR)
+}
+```
+
+Privileges needed: `VERFY | RINFO`
+
+
+### SAVE
+
+Update user information.
+
+Fields:
+- `info`
+- `passwd`
+
+```json
+{
+    "msg": (STR)
+}
+```
+
+Privileges needed: `VERFY | EXTAC`
+
+
+### DEL
+
+Delete a account.
+
+```json
+{
+    "msg": (STR)
+}
+```
+
+Privileges needed: `VERFY | EXTAC`
 
 
 ## Database
