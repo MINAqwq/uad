@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"strconv"
 	"time"
@@ -174,18 +173,10 @@ func authm_op_info(req *AuthmRequest, resp *AuthmResponse) {
 
 	db_usr_get_user_id(session_data.Id, &user)
 
-	info := AuthmUserInfo{}
-	info.Username = user.username
-	info.Info = user.info
-	info.Created = user.created
-
-	json_data, err := json.Marshal(info)
-	if err != nil {
-		resp.Err = "internal error"
-		return
-	}
-
-	resp.Resp["User"] = json_data
+	resp.Resp["Username"] = user.username
+	resp.Resp["Info"] = user.info
+	resp.Resp["Created"] = user.created
+	return
 }
 
 func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
