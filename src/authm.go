@@ -203,6 +203,10 @@ func authm_op_save(req *AuthmRequest, resp *AuthmResponse) {
 			return
 		}
 	} else if req.Args[1] == "passwd" {
+		if (len(req.Args[2]) < 5) || (len(req.Args[2]) > 20) {
+			resp.Err = "invalid new password (5 - 20 chars)"
+			return
+		}
 		if db_usr_update_passwd(security_hash_salt_password(req.Args[2], security_create_salt()), session_data.Id) {
 			resp.Resp["msg"] = "done!"
 			return
