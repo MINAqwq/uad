@@ -4,6 +4,7 @@ Provides an API reading and returning data in JSON.
 
 ## TODO
 
+- [ ] Daemonizing by flag
 - [ ] Error codes instead of strings (transport less bytes)
 - [ ] Verification code mailing
 
